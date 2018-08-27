@@ -1,0 +1,23 @@
+================================================================================
+|| TO DO
+================================================================================
+
+- Implement basic game logic:
+ -> Fields
+ -> Weather
+ -> Crops
+ -> Harvest calculation
+ -> Reporting to player
+
+- Add unit tests
+
+- Extract crop and field data to files
+- Add ability to purchase fields
+- Add win condition
+
+- Extract logging to a class if possible (allow AI launcher to suppress prompts)
+
+- Abstract input provision to allow AI to choose
+- Create notion of strategies
+- Create evolutionary algorithm for optimizing strategy
+- Report evolution results to player
