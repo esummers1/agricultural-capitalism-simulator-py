@@ -4,9 +4,7 @@
 
 - Implement basic game logic:
  -> Fields
- -> Weather
  -> Crops
- -> Harvest calculation
  -> Reporting to player
 
 - Add unit tests

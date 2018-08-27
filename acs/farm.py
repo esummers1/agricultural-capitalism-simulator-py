@@ -1,8 +1,8 @@
 class Farm:
 
-    def __init__(self, owned_fields):
+    def __init__(self, owned_fields, initial_money):
         self.owned_fields = owned_fields
-        self.funds = 0
+        self.money = initial_money
 
 
 class Field:
@@ -33,6 +33,30 @@ class Field:
     def plant(self, crop, quantity):
         self.crop = crop
         self.crop_quantity = quantity
+
+    def is_empty(self):
+        return self.crop is None
+
+    def calculate_profit(self, weather):
+
+        """Evaluate the distance between the crop's ideal weather and the
+        actual weather, scale this depending on the crop's sensitivity
+        to that weather, and calculate yield as a perfect score of 1
+        minus deductions according to weather differences."""
+
+        heat_delta = abs(weather.heat - self.crop.ideal_heat)
+        wetness_delta = abs(weather.wetness - self.crop.ideal_wetness)
+
+        heat_score = heat_delta * self.crop.heat_sensitivity
+        wetness_score = wetness_delta * self.crop.wetness_sensitivity
+
+        crop_yield = 1 - heat_score - wetness_score
+
+        return int(
+            crop_yield
+            * self.crop_quantity
+            * self.crop.sale_price
+            * self.soil_quality)
 
 
 class Crop:
