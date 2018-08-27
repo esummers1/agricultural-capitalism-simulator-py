@@ -11,7 +11,6 @@
 
 - Add unit tests
 
-- Extract crop and field data to files
 - Add ability to purchase fields
 - Add win condition
 

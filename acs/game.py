@@ -1,12 +1,20 @@
-from acs.farm import Farm
+from acs.farm import *
 from acs.actions import *
+from acs.data_reader import *
 
 
 class Game:
 
     def __init__(self):
-        self.farm = Farm()
+        data_reader = DataReader()
+        self.available_crops = data_reader.import_crops()
+        self.available_fields = data_reader.import_fields()
+
+        first_field = self.available_fields.pop(0)
+
+        self.farm = Farm(first_field)
         self.exiting = False
+
 
     def run(self):
 

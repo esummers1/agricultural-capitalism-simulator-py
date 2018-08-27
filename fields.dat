@@ -1,0 +1,37 @@
+{
+  "fields":
+    [
+      {
+        "id": 0,
+        "name": "Basic Field",
+        "description": "a medium-sized field with decent soil.",
+        "max_crop_quantity": 100,
+        "soil_quality": 1.0,
+        "price": 1200
+      },
+      {
+        "id": 1,
+        "name": "Lush Field",
+        "description": "a small field with fertile soil.",
+        "max_crop_quantity": 50,
+        "soil_quality": 1.1,
+        "price": 1500
+      },
+      {
+        "id": 2,
+        "name": "Rugged Field",
+        "description": "a voluminous field with slightly rocky soil.",
+        "max_crop_quantity": 200,
+        "soil_quality": 0.9,
+        "price": 2500
+      },
+      {
+        "id": 3,
+        "name": "Prime Field",
+        "description": "a medium-sized field with excellent soil.",
+        "max_crop_quantity": 100,
+        "soil_quality": 1.2,
+        "price": 5000
+      }
+    ]
+}
