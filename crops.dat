@@ -1,0 +1,115 @@
+{
+  "crops":
+    [
+      {
+        "id": 0,
+        "name": "Wheat",
+        "description": "Grass cultivated worldwide for its starchy cereal grains. \nGrows well in warm weather.",
+        "cost": 5,
+        "sale_price": 7,
+        "wetness_sensitivity": 0.5,
+        "heat_sensitivity": 0.5,
+        "ideal_heat": 1.05,
+        "ideal_wetness": 1.05
+      },
+      {
+        "id": 1,
+        "name": "Turnip",
+        "description": "Reliable root vegetable which loves temperate climates.",
+        "cost": 6,
+        "sale_price": 9,
+        "wetness_sensitivity": 0.8,
+        "heat_sensitivity": 0.8,
+        "ideal_heat": 0.9,
+        "ideal_wetness": 1
+      },
+      {
+        "id": 2,
+        "name": "Potato",
+        "description": "Starchy tuber of the nightshade family prized for caloric \ncontent. Thrives in cool, wet weather.",
+        "cost": 8,
+        "sale_price": 14,
+        "wetness_sensitivity": 1.1,
+        "heat_sensitivity": 0.7,
+        "ideal_heat": 0.9,
+        "ideal_wetness": 1.1
+      },
+      {
+        "id": 3,
+        "name": "Carrot",
+        "description": "Nutritious root vegetable which prefers plenty of sunlight.",
+        "cost": 9,
+        "sale_price": 18,
+        "wetness_sensitivity": 0.8,
+        "heat_sensitivity": 1.2,
+        "ideal_heat": 1.2,
+        "ideal_wetness": 1
+      },
+      {
+        "id": 4,
+        "name": "Parsnip",
+        "description": "Tasty root vegetable which is spoiled by excessive rain.",
+        "cost": 9,
+        "sale_price": 17,
+        "wetness_sensitivity": 1.2,
+        "heat_sensitivity": 0.8,
+        "ideal_heat": 1,
+        "ideal_wetness": 0.9
+      },
+      {
+        "id": 5,
+        "name": "Tomato",
+        "description": "Juicy fruit of the nightshade family requiring warmth and \nplenty of sun.",
+        "cost": 9,
+        "sale_price": 17,
+        "wetness_sensitivity": 0.5,
+        "heat_sensitivity": 1.3,
+        "ideal_heat": 1.2,
+        "ideal_wetness": 1
+      },
+      {
+        "id": 6,
+        "name": "Corn",
+        "description": "Profitable grain plant requiring warm and wet weather.",
+        "cost": 11,
+        "sale_price": 26,
+        "wetness_sensitivity": 1,
+        "heat_sensitivity": 1.3,
+        "ideal_heat": 1.15,
+        "ideal_wetness": 1.1
+      },
+      {
+        "id": 7,
+        "name": "Blueberry",
+        "description": "Delicious and popular berry damaged by heavy rain.",
+        "cost": 13,
+        "sale_price": 30,
+        "wetness_sensitivity": 2,
+        "heat_sensitivity": 0.7,
+        "ideal_heat": 1,
+        "ideal_wetness": 0.8
+      },
+      {
+        "id": 8,
+        "name": "Grape",
+        "description": "An expensive and tricky berry growing best in warm, dry \nclimates. Potentially very valuable.",
+        "cost": 18,
+        "sale_price": 45,
+        "wetness_sensitivity": 1.1,
+        "heat_sensitivity": 1.1,
+        "ideal_heat": 1.2,
+        "ideal_wetness": 0.8
+      },
+      {
+        "id": 9,
+        "name": "Pumpkin",
+        "description": "Squash plant prized for decoration. Prefers warm weather \nand some rain.",
+        "cost": 21,
+        "sale_price": 37,
+        "wetness_sensitivity": 1,
+        "heat_sensitivity": 1,
+        "ideal_heat": 1.1,
+        "ideal_wetness": 1.1
+      }
+    ]
+}
