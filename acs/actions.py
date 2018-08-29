@@ -56,6 +56,18 @@ class ListCropsAction(Action):
         return False
 
 
+class PlantCropsAction(Action):
+
+    def execute(self):
+        self.game.plant_crops()
+
+    def get_prompt(self):
+        return "Buy and plant crops"
+
+    def should_end_round(self):
+        return False
+
+
 class ExitAction(Action):
 
     def execute(self):

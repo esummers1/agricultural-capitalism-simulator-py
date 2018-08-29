@@ -1,7 +1,9 @@
 from acs.actions import *
 from acs.data_reader import *
 from acs.farm import *
+from acs.input_providers import *
 from acs.weather import *
+import math
 
 
 class Game:
@@ -48,7 +50,18 @@ class Game:
         self.score = 0
         self.exiting = False
         self.weather_generator = WeatherGenerator()
+        self.lowest_crop_cost = self.get_lowest_crop_cost()
+        self.input_provider = PlayerInputProvider()
 
+    def get_lowest_crop_cost(self):
+
+        lowest_cost = 10000
+
+        for crop in self.available_crops:
+            if crop.cost < lowest_cost:
+                lowest_cost = crop.cost
+
+        return lowest_cost
 
     def run(self):
         """Main game loop."""
@@ -57,41 +70,45 @@ class Game:
 
         while True:
 
-            action = self.ask_for_input()
+            action = self.decide_action()
             action.execute()
 
             if self.exiting:
                 break
 
             if action.should_end_round():
-                self.run_logic()
-                continue
+                self.advance_year()
 
     def greet_player(self):
-        print("Welcome to Agricultural Capitalism Simulator! \n")
-        print("You have", self.max_years, "years to make maximum profit. \n")
+        self.input_provider.show_greeting()
 
-    def ask_for_input(self):
+    def decide_action(self):
+        actions = self.build_actions()
+        return self.input_provider.decide_action(actions)
 
-        actions = {
-            1: StatusAction(self),
-            2: ListCropsAction(self),
-            3: PlayAction(self),
-            4: ExitAction(self)
-        }
+    def build_actions(self):
 
-        # List available actions
-        for key, value in actions.items():
-            action_choice_text = str(key) + ") " + value.get_prompt()
-            print(action_choice_text)
+        actions = [
+            StatusAction(self),
+            ListCropsAction(self)
+        ]
 
-        while True:
+        if self.is_empty_field_available() \
+                and self.farm.money >= self.lowest_crop_cost:
+            actions.append(PlantCropsAction(self))
 
-            # Ask for choice
-            selection = int(input())
+        actions.append(PlayAction(self))
+        actions.append(ExitAction(self))
 
-            if selection in actions.keys():
-                return actions[selection]
+        return self.make_numbered_dictionary(actions)
+
+    def is_empty_field_available(self):
+
+        for field in self.farm.owned_fields:
+            if field.is_empty():
+                return True
+
+        return False
 
     def report_status(self):
         print("Showing status!")
@@ -99,7 +116,47 @@ class Game:
     def list_crops(self):
         print("Listing crops!")
 
-    def run_logic(self):
+    def plant_crops(self):
+
+        # Decide field for planting
+        empty_fields = [field for field in self.farm.owned_fields
+                        if field.is_empty()]
+        numbered_empty_fields = Game.make_numbered_dictionary(empty_fields)
+
+        selected_field = self.input_provider.decide_field_to_plant(
+            numbered_empty_fields)
+
+        # Decide crop for planting
+        numbered_crops = Game.make_numbered_dictionary(self.available_crops)
+        selected_crop = self.input_provider.decide_crop_to_plant(numbered_crops)
+
+        # Calculate maximum that can be planted here
+        affordable_quantity = math.floor(self.farm.money / selected_crop.cost)
+        maximum_crop_quantity = min(affordable_quantity,
+                                    selected_field.max_crop_quantity)
+
+        # Decide quantity to plant
+        quantity_to_plant = self.input_provider.decide_crop_quantity(
+            maximum_crop_quantity)
+
+        # Plant this field
+        selected_field.crop = selected_crop
+        selected_field.crop_quantity = quantity_to_plant
+
+        # Debit money by amount spent
+        self.farm.money -= (selected_crop.cost * quantity_to_plant)
+
+    @staticmethod
+    def make_numbered_dictionary(ordered_list):
+
+        new_dict = {}
+
+        for counter, value in enumerate(ordered_list, 1):
+            new_dict[counter] = value
+
+        return new_dict
+
+    def advance_year(self):
 
         """Calculate the outcome of the year's growth, and inform the player.
         TODO: Can split into two functions later"""
