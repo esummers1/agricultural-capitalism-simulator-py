@@ -26,13 +26,27 @@ class InputProvider(ABC):
     def show_greeting(self):
         pass
 
+    @abstractmethod
+    def list_available_crops_with_details(self):
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def report_profit(profit):
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def show_loss_message():
+        pass
+
 
 class PlayerInputProvider(InputProvider):
 
     def decide_action(self, numbered_actions):
 
         # List available actions
-        PlayerInputProvider.list_ordered_options(numbered_actions)
+        PlayerInputProvider.list_action_options(numbered_actions)
 
         # Prompt for choice
         return PlayerInputProvider.choose_from_numbered_list(numbered_actions)
@@ -40,8 +54,8 @@ class PlayerInputProvider(InputProvider):
     def decide_field_to_plant(self, numbered_fields):
 
         # List available fields
-        print("Which field would you like to plant in?\n")
-        PlayerInputProvider.list_ordered_options(numbered_fields)
+        print("\nWhich field would you like to plant in?")
+        PlayerInputProvider.list_numbered_items(numbered_fields)
 
         # Prompt for choice
         return PlayerInputProvider.choose_from_numbered_list(numbered_fields)
@@ -49,8 +63,8 @@ class PlayerInputProvider(InputProvider):
     def decide_crop_to_plant(self, numbered_crops):
 
         # List available crops
-        print("Which crop would you like to plant?")
-        PlayerInputProvider.list_ordered_options(numbered_crops)
+        print("\nWhich crop would you like to plant?")
+        PlayerInputProvider.list_numbered_items(numbered_crops)
 
         # Prompt for choice
         return PlayerInputProvider.choose_from_numbered_list(numbered_crops)
@@ -70,10 +84,33 @@ class PlayerInputProvider(InputProvider):
         print("You have", self.game.max_years,
               "years to make maximum profit. \n")
 
+    def list_available_crops_with_details(self):
+        print("\nAvailable crops for planting:\n")
+        for crop in self.game.available_crops:
+            crop.describe()
+
     @staticmethod
-    def list_ordered_options(numbered_options):
-        for key, value in numbered_options.items():
-            print(str(key) + ") " + value.get_prompt())
+    def report_profit(profit):
+        if profit < 0:
+            print("Commiserations: you made a loss of", profit, "this year.")
+        else:
+            print("Congratulations: you made a profit of", profit, "this year.")
+
+    @staticmethod
+    def show_loss_message():
+        print("\nYou are bankrupt. You will have to find a job.")
+
+    @staticmethod
+    def list_action_options(action_options):
+        for key, value in action_options.items():
+            string_to_print = (str(key) + ") " + value.get_prompt())
+            print(string_to_print)
+
+    @staticmethod
+    def list_numbered_items(numbered_items):
+        for key, value in numbered_items.items():
+            string_to_print = (str(key) + ") " + value.name)
+            print(string_to_print)
 
     @staticmethod
     def choose_from_numbered_list(numbered_list):

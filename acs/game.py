@@ -51,7 +51,7 @@ class Game:
         self.exiting = False
         self.weather_generator = WeatherGenerator()
         self.lowest_crop_cost = self.get_lowest_crop_cost()
-        self.input_provider = PlayerInputProvider()
+        self.input_provider = PlayerInputProvider(self)
 
     def get_lowest_crop_cost(self):
 
@@ -66,7 +66,7 @@ class Game:
     def run(self):
         """Main game loop."""
 
-        self.greet_player()
+        self.input_provider.show_greeting()
 
         while True:
 
@@ -79,8 +79,8 @@ class Game:
             if action.should_end_round():
                 self.advance_year()
 
-    def greet_player(self):
-        self.input_provider.show_greeting()
+        # TODO
+        print("Showing score message")
 
     def decide_action(self):
         actions = self.build_actions()
@@ -93,8 +93,7 @@ class Game:
             ListCropsAction(self)
         ]
 
-        if self.is_empty_field_available() \
-                and self.farm.money >= self.lowest_crop_cost:
+        if self.is_empty_field_available() and not self.is_player_bankrupt():
             actions.append(PlantCropsAction(self))
 
         actions.append(PlayAction(self))
@@ -114,7 +113,7 @@ class Game:
         print("Showing status!")
 
     def list_crops(self):
-        print("Listing crops!")
+        self.input_provider.list_available_crops_with_details()
 
     def plant_crops(self):
 
@@ -157,21 +156,28 @@ class Game:
         return new_dict
 
     def advance_year(self):
-
-        """Calculate the outcome of the year's growth, and inform the player.
-        TODO: Can split into two functions later"""
-
-        profit_this_year = 0
         weather = self.weather_generator.generate()
+        profit = self.calculate_profits(weather)
 
-        for field in self.farm.owned_fields:
-            if not field.is_empty():
-                profit_this_year += field.calculate_profit(weather)
-
-        print("Showing results!")
+        self.input_provider.report_profit(profit)
 
         for field in self.farm.owned_fields:
             field.clear()
+
+        if self.is_player_bankrupt():
+            self.input_provider.show_loss_message()
+
+        self.current_year += 1
+
+    def calculate_profits(self, weather):
+        profit_this_year = 0
+        for field in self.farm.owned_fields:
+            if not field.is_empty():
+                profit_this_year += field.calculate_profit(weather)
+        return profit_this_year
+
+    def is_player_bankrupt(self):
+        return self.farm.money < self.lowest_crop_cost
 
     def exit(self):
 

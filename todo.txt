@@ -2,13 +2,12 @@
 || TO DO
 ================================================================================
 
-- Implement basic game logic:
- -> Reporting to player
+- Add farm status action
+- Add ability to purchase fields
+- Add score evaluation at max years
+- Improve detail of yearly reporting
 
 - Add unit tests
-
-- Add ability to purchase fields
-- Add win condition
 
 - Create notion of strategies
 - Create evolutionary algorithm for optimizing strategy

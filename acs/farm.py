@@ -82,6 +82,6 @@ class Crop:
         self.heat_sensitivity = heat_sensitivity
         self.wetness_sensitivity = wetness_sensitivity
 
-    def print(self):
-        print(self.name, ": ", self.description)
-        print("Cost: ", self.cost, ". Sale price: ", self.sale_price)
+    def describe(self):
+        print(self.name, "-", self.description)
+        print("Cost:", self.cost, "  Sale price:", self.sale_price, "\n")
