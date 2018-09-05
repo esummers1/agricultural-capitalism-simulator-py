@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+from game import Game
+from weather import WeatherGenerator
 
 
 class InputProvider(ABC):
@@ -30,6 +32,20 @@ class InputProvider(ABC):
     def list_available_crops_with_details(self):
         pass
 
+    @abstractmethod
+    def report_status(self):
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def show_year_results_header():
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def report_weather(weather):
+        pass
+
     @staticmethod
     @abstractmethod
     def report_profit(profit):
@@ -38,6 +54,11 @@ class InputProvider(ABC):
     @staticmethod
     @abstractmethod
     def show_loss_message():
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def show_final_score(score):
         pass
 
 
@@ -72,36 +93,81 @@ class PlayerInputProvider(InputProvider):
     def decide_crop_quantity(self, maximum):
 
         # Advise of maximum quantity
-        print("How many would you like to plant? (1 - ",
-              str(maximum),
-              ")")
+        print("How many would you like to plant? ( 1 - ", maximum, ")")
 
         # Prompt for choice
         return PlayerInputProvider.choose_quantity(maximum)
 
     def show_greeting(self):
         print("Welcome to Agricultural Capitalism Simulator! \n")
-        print("You have", self.game.max_years,
-              "years to make maximum profit. \n")
+        print("You have", self.game.max_years, "years to make maximum profit.")
 
     def list_available_crops_with_details(self):
         print("\nAvailable crops for planting:\n")
         for crop in self.game.available_crops:
             crop.describe()
 
+    def report_status(self, game):
+        print("\nYear:", game.current_year)
+        print("Balance:", game.farm.money)
+        print("Cash:", game.calculate_assets())
+        print("\nFields:\n")
+
+        for field in game.farm.owned_fields:
+            field.report_status()
+
+    @staticmethod
+    def show_year_results_header():
+        print("\n====== RESULTS ======")
+
+    @staticmethod
+    def report_weather(weather):
+
+        heat_message = PlayerInputProvider.find_weather_band(
+            weather.heat, Game.heat_bands, WeatherGenerator.heat_deviation
+        )
+        wetness_message = PlayerInputProvider.find_weather_band(
+            weather.wetness,
+            Game.wetness_bands,
+            WeatherGenerator.wetness_deviation
+        )
+        print()
+        print(heat_message, wetness_message)
+
     @staticmethod
     def report_profit(profit):
         if profit < 0:
-            print("Commiserations: you made a loss of", profit, "this year.")
+            print("Commiserations... you made a loss of", profit)
         else:
-            print("Congratulations: you made a profit of", profit, "this year.")
+            print("Congratulations! You made a profit of", profit)
 
     @staticmethod
     def show_loss_message():
         print("\nYou are bankrupt. You will have to find a job.")
 
     @staticmethod
+    def show_final_score(score):
+        print("\nWell played, capitalist - the rich get richer.")
+        print("Final total assets:", score)
+
+    @staticmethod
+    def find_weather_band(weather_component, weather_bands, deviation):
+
+        """
+        TODO: move this elsewhere?
+
+        Given a component of some Weather and the deviation factor used when
+        calculating said Weather component's value in this game, find the
+        correct band in a given list of WeatherBands to describe this result.
+        """
+
+        for band in reversed(weather_bands):
+            if weather_component >= deviation * band.min_value:
+                return band.message
+
+    @staticmethod
     def list_action_options(action_options):
+        print()
         for key, value in action_options.items():
             string_to_print = (str(key) + ") " + value.get_prompt())
             print(string_to_print)

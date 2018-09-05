@@ -3,6 +3,7 @@ class Farm:
     def __init__(self, owned_fields, initial_money):
         self.owned_fields = owned_fields
         self.money = initial_money
+        self.current_year_expenditure = 0
 
 
 class Field:
@@ -37,12 +38,29 @@ class Field:
     def is_empty(self):
         return self.crop is None
 
+    def report_status(self):
+
+        """
+        Print a summary of this field's properties and contents.
+        """
+
+        if self.crop is None:
+            print(self.name, "-", self.description)
+            print("Value:", self.price, " Size:", self.max_crop_quantity)
+            print("Contents: None\n")
+        else:
+            print(self.name, "-", self.description)
+            print("Value:", self.price, " Size:", self.max_crop_quantity)
+            print("Contents:", self.crop.name, "(", self.crop_quantity, ")\n")
+
     def calculate_profit(self, weather):
 
-        """Evaluate the distance between the crop's ideal weather and the
+        """
+        Evaluate the distance between the crop's ideal weather and the
         actual weather, scale this depending on the crop's sensitivity
         to that weather, and calculate yield as a perfect score of 1
-        minus deductions according to weather differences."""
+        minus deductions according to weather differences.
+        """
 
         heat_delta = abs(weather.heat - self.crop.ideal_heat)
         wetness_delta = abs(weather.wetness - self.crop.ideal_wetness)
