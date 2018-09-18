@@ -36,6 +36,10 @@ class InputProvider(ABC):
     def report_status(self):
         pass
 
+    @abstractmethod
+    def report_field_performance(self):
+        pass
+
     @staticmethod
     @abstractmethod
     def show_year_results_header():
@@ -48,7 +52,7 @@ class InputProvider(ABC):
 
     @staticmethod
     @abstractmethod
-    def report_profit(profit):
+    def report_financials(income, expenditure, new_assets):
         pass
 
     @staticmethod
@@ -110,11 +114,16 @@ class PlayerInputProvider(InputProvider):
     def report_status(self, game):
         print("\nYear:", game.current_year)
         print("Balance:", game.farm.money)
-        print("Cash:", game.calculate_assets())
+        print("Asset Value:", game.calculate_assets())
         print("\nFields:\n")
 
         for field in game.farm.owned_fields:
             field.report_status()
+
+    def report_field_performance(self):
+        print()
+        for field in self.game.farm.owned_fields:
+            field.report_performance()
 
     @staticmethod
     def show_year_results_header():
@@ -124,18 +133,25 @@ class PlayerInputProvider(InputProvider):
     def report_weather(weather):
 
         heat_message = PlayerInputProvider.find_weather_band(
-            weather.heat, Game.heat_bands, WeatherGenerator.heat_deviation
+            weather.heat,
+            Game.heat_bands,
+            WeatherGenerator.heat_deviation
         )
         wetness_message = PlayerInputProvider.find_weather_band(
             weather.wetness,
             Game.wetness_bands,
             WeatherGenerator.wetness_deviation
         )
-        print()
-        print(heat_message, wetness_message)
+        print(heat_message, wetness_message, "\n")
 
     @staticmethod
-    def report_profit(profit):
+    def report_financials(income, expenditure, new_assets):
+        print("Asset acquisitions:", new_assets)
+        print("Revenue:", income)
+        print("Expenses:", expenditure)
+
+        profit = income + new_assets - expenditure
+
         if profit < 0:
             print("Commiserations... you made a loss of", profit)
         else:
@@ -154,15 +170,15 @@ class PlayerInputProvider(InputProvider):
     def find_weather_band(weather_component, weather_bands, deviation):
 
         """
-        TODO: move this elsewhere?
-
         Given a component of some Weather and the deviation factor used when
         calculating said Weather component's value in this game, find the
         correct band in a given list of WeatherBands to describe this result.
         """
 
+        number_of_sd_from_mean = (weather_component - 1) / deviation
+
         for band in reversed(weather_bands):
-            if weather_component >= deviation * band.min_value:
+            if number_of_sd_from_mean >= (band.min_value):
                 return band.message
 
     @staticmethod

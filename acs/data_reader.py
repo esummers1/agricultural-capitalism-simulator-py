@@ -49,8 +49,6 @@ class DataReader:
                     field["id"],
                     field["name"],
                     field["description"],
-                    None,
-                    None,
                     field["max_crop_quantity"],
                     field["soil_quality"],
                     field["price"]
