@@ -2,10 +2,7 @@
 || TO DO
 ================================================================================
 
-- Add farm status action
 - Add ability to purchase fields
-- Add score evaluation at max years
-- Improve detail of yearly reporting
 
 - Add unit tests
 
