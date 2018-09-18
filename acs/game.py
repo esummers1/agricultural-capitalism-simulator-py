@@ -179,17 +179,23 @@ class Game:
 
         # Compute results
         weather = self.weather_generator.generate()
+        new_assets = self.farm.current_year_new_assets
         income = self.calculate_income(weather)
-        profit = income - self.farm.current_year_expenditure
+        expenditure = self.farm.current_year_expenditure
 
         # Report to player
         self.input_provider.show_year_results_header()
         self.input_provider.report_weather(weather)
-        self.input_provider.report_profit(profit)
+        self.input_provider.report_financials(income, expenditure, new_assets)
+        self.input_provider.report_field_performance()
 
         # Register results in game state
         self.current_year += 1
         self.farm.money += income
+
+        # Clear financials
+        self.farm.current_year_new_assets = 0
+        self.farm.current_year_expenditure = 0
 
         # Clear fields
         for field in self.farm.owned_fields:
@@ -200,11 +206,11 @@ class Game:
             self.input_provider.show_loss_message()
 
     def calculate_income(self, weather):
-        profit_this_year = 0
+        income_this_year = 0
         for field in self.farm.owned_fields:
             if not field.is_empty():
-                profit_this_year += field.calculate_profit(weather)
-        return profit_this_year
+                income_this_year += field.calculate_income(weather)
+        return income_this_year
 
     def calculate_assets(self):
         assets = 0

@@ -3,9 +3,6 @@
 ================================================================================
 
 - Add ability to purchase fields
-- Improve detail of yearly reporting
- -> Add breakdown by field
- -> Add summary of financials
 
 - Add unit tests
 
