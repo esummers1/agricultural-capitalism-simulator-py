@@ -68,6 +68,18 @@ class PlantCropsAction(Action):
         return False
 
 
+class BuyFieldsAction(Action):
+
+    def execute(self):
+        self.game.buy_fields()
+
+    def get_prompt(self):
+        return "Buy fields"
+
+    def should_end_round(self):
+        return False
+
+
 class ExitAction(Action):
 
     def execute(self):

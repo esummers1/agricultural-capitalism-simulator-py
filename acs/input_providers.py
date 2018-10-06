@@ -25,6 +25,10 @@ class InputProvider(ABC):
         pass
 
     @abstractmethod
+    def decide_field_to_buy(self, numbered_fields):
+        pass
+
+    @abstractmethod
     def show_greeting(self):
         pass
 
@@ -101,6 +105,22 @@ class PlayerInputProvider(InputProvider):
 
         # Prompt for choice
         return PlayerInputProvider.choose_quantity(maximum)
+
+    def decide_field_to_buy(self, numbered_fields):
+
+        # List available fields
+        print("\nWhich field would you like to purchase? Enter 0 to cancel.")
+        for key, field in numbered_fields.items():
+            first_line = (str(key) + ") " + field.name + " - " +
+                               field.description)
+            print()
+            print(first_line)
+            print("Price:", field.price)
+
+        print()
+
+        # Prompt for choice
+        return PlayerInputProvider.choose_from_numbered_list(numbered_fields)
 
     def show_greeting(self):
         print("Welcome to Agricultural Capitalism Simulator! \n")
@@ -201,6 +221,8 @@ class PlayerInputProvider(InputProvider):
 
             if selection in numbered_list.keys():
                 return numbered_list[selection]
+            if selection == 0:
+                return None
 
     @staticmethod
     def choose_quantity(maximum):
