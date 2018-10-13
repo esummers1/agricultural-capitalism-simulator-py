@@ -2,8 +2,6 @@
 || TO DO
 ================================================================================
 
-- Add ability to purchase fields
-
 - Add unit tests
 
 - Create notion of strategies

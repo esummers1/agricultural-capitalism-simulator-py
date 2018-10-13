@@ -62,6 +62,16 @@ class Game:
 
         return lowest_cost
 
+    def get_lowest_field_price(self):
+
+        lowest_price = 10000
+
+        for field in self.available_fields:
+            if field.price < lowest_price:
+                lowest_price = field.price
+
+        return lowest_price
+
     def run(self):
 
         """
@@ -107,18 +117,25 @@ class Game:
         if self.is_empty_field_available() and not self.is_player_bankrupt():
             actions.append(PlantCropsAction(self))
 
+        if self.are_fields_available_to_buy():
+            actions.append(BuyFieldsAction(self))
+
         actions.append(PlayAction(self))
         actions.append(ExitAction(self))
 
         return self.make_numbered_dictionary(actions)
 
     def is_empty_field_available(self):
-
         for field in self.farm.owned_fields:
             if field.is_empty():
                 return True
 
         return False
+
+    def are_fields_available_to_buy(self):
+        return \
+            (len(self.available_fields) > 0) and \
+            (self.get_lowest_field_price() < self.farm.money)
 
     def report_status(self):
         self.input_provider.report_status(self)
@@ -130,7 +147,7 @@ class Game:
 
         """
         Prompt player to select an empty field, a crop, and a quantity to plant.
-        Store these crops in the appropriate field and register the transaction.
+        Store these crops in the appropriate field and record the transaction.
         """
 
         # Decide field for planting
@@ -141,11 +158,17 @@ class Game:
         selected_field = self.input_provider.decide_field_to_plant(
             numbered_empty_fields)
 
+        if selected_field is None:
+            return
+
         # Decide crop for planting
         affordable_crops = [crop for crop in self.available_crops
                             if crop.cost < self.farm.money]
         numbered_crops = Game.make_numbered_dictionary(affordable_crops)
         selected_crop = self.input_provider.decide_crop_to_plant(numbered_crops)
+
+        if selected_crop is None:
+            return
 
         # Calculate maximum that can be planted here
         affordable_quantity = math.floor(self.farm.money / selected_crop.cost)
@@ -156,6 +179,9 @@ class Game:
         quantity_to_plant = self.input_provider.decide_crop_quantity(
             maximum_crop_quantity)
 
+        if quantity_to_plant is None:
+            return
+
         # Plant this field
         selected_field.crop = selected_crop
         selected_field.crop_quantity = quantity_to_plant
@@ -165,9 +191,37 @@ class Game:
         self.farm.money -= total_crop_cost
         self.farm.current_year_expenditure += total_crop_cost
 
+    def buy_fields(self):
+
+        """
+        List fields available to the player to purchase, ask if they want to
+        buy one, and if so record the transaction.
+        """
+
+        # Decide field for purchase
+        affordable_fields = [field for field in self.available_fields
+                             if field.price < self.farm.money]
+        numbered_fields = Game.make_numbered_dictionary(affordable_fields)
+
+        selected_field = self.input_provider.decide_field_to_buy(
+            numbered_fields)
+
+        if selected_field is None:
+            return
+
+        # Change ownership of selected field
+        for counter, field in enumerate(self.available_fields, 1):
+             if field == selected_field:
+                 self.farm.owned_fields.append(
+                     self.available_fields.pop(counter - 1))
+
+        # Record transaction
+        self.farm.money -= selected_field.price
+        self.farm.current_year_expenditure += selected_field.price
+        self.farm.current_year_new_assets += selected_field.price
+
     @staticmethod
     def make_numbered_dictionary(ordered_list):
-
         new_dict = {}
 
         for counter, value in enumerate(ordered_list, 1):
