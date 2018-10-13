@@ -158,11 +158,17 @@ class Game:
         selected_field = self.input_provider.decide_field_to_plant(
             numbered_empty_fields)
 
+        if selected_field is None:
+            return
+
         # Decide crop for planting
         affordable_crops = [crop for crop in self.available_crops
                             if crop.cost < self.farm.money]
         numbered_crops = Game.make_numbered_dictionary(affordable_crops)
         selected_crop = self.input_provider.decide_crop_to_plant(numbered_crops)
+
+        if selected_crop is None:
+            return
 
         # Calculate maximum that can be planted here
         affordable_quantity = math.floor(self.farm.money / selected_crop.cost)
@@ -172,6 +178,9 @@ class Game:
         # Decide quantity to plant
         quantity_to_plant = self.input_provider.decide_crop_quantity(
             maximum_crop_quantity)
+
+        if quantity_to_plant is None:
+            return
 
         # Plant this field
         selected_field.crop = selected_crop

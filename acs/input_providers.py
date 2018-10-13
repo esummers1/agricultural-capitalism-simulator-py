@@ -83,7 +83,7 @@ class PlayerInputProvider(InputProvider):
     def decide_field_to_plant(self, numbered_fields):
 
         # List available fields
-        print("\nWhich field would you like to plant in?")
+        print("\nWhich field would you like to plant in? Enter 0 to cancel.")
         PlayerInputProvider.list_numbered_items(numbered_fields)
 
         # Prompt for choice
@@ -92,7 +92,7 @@ class PlayerInputProvider(InputProvider):
     def decide_crop_to_plant(self, numbered_crops):
 
         # List available crops
-        print("\nWhich crop would you like to plant?")
+        print("\nWhich crop would you like to plant? Enter 0 to cancel.")
         PlayerInputProvider.list_numbered_items(numbered_crops)
 
         # Prompt for choice
@@ -100,8 +100,9 @@ class PlayerInputProvider(InputProvider):
 
     def decide_crop_quantity(self, maximum):
 
-        # Advise of maximum quantity
-        print("How many would you like to plant? ( 1 - ", maximum, ")")
+        # Advise of available range
+        print("How many would you like to plant? "
+              "( 1 - ", maximum, "| to cancel.)")
 
         # Prompt for choice
         return PlayerInputProvider.choose_quantity(maximum)
@@ -192,7 +193,8 @@ class PlayerInputProvider(InputProvider):
         """
         Given a component of some Weather and the deviation factor used when
         calculating said Weather component's value in this game, find the
-        correct band in a given list of WeatherBands to describe this result.
+        correct band in a given list of WeatherBands to describe this result,
+        and return its message field.
         """
 
         number_of_sd_from_mean = (weather_component - 1) / deviation
@@ -216,6 +218,12 @@ class PlayerInputProvider(InputProvider):
 
     @staticmethod
     def choose_from_numbered_list(numbered_list):
+        """
+        Prompt player to enter a number between 0 and the length of the supplied
+        dictionary, and continue prompting until such an input is given. Return
+        the number selected, or None if the selection is 0.
+        """
+
         while True:
             selection = int(input())
 
@@ -225,9 +233,18 @@ class PlayerInputProvider(InputProvider):
                 return None
 
     @staticmethod
+
     def choose_quantity(maximum):
+        """
+        Prompt player to enter a number between 0 and the maximum, and continue
+        prompting until such an input is given. Return the number selected, or
+        None if the selection is 0.
+        """
+
         while True:
             selection = int(input())
 
             if 0 < selection <= maximum:
                 return selection
+            if selection == 0:
+                return None

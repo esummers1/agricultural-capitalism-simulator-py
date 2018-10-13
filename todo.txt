@@ -2,8 +2,6 @@
 || TO DO
 ================================================================================
 
-- Allow cancellation with 0 at any input step other than main game loop
-
 - Add unit tests
 
 - Create notion of strategies
