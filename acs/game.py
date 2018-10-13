@@ -50,7 +50,6 @@ class Game:
         self.exiting = False
         self.weather_generator = WeatherGenerator()
         self.lowest_crop_cost = self.get_lowest_crop_cost()
-        self.input_provider = PlayerInputProvider(self)
 
     def get_lowest_crop_cost(self):
 
@@ -73,7 +72,6 @@ class Game:
         return lowest_price
 
     def run(self):
-
         """
         Main game loop.
         """
@@ -83,6 +81,10 @@ class Game:
         while True:
 
             action = self.decide_action()
+
+            if action is None:
+                continue
+
             action.execute()
 
             if self.exiting:
@@ -104,7 +106,6 @@ class Game:
         return self.input_provider.decide_action(actions)
 
     def build_actions(self):
-
         """
         Create a numbered dictionary of Actions based on the current situation.
         """
@@ -144,7 +145,6 @@ class Game:
         self.input_provider.list_available_crops_with_details()
 
     def plant_crops(self):
-
         """
         Prompt player to select an empty field, a crop, and a quantity to plant.
         Store these crops in the appropriate field and record the transaction.
@@ -192,7 +192,6 @@ class Game:
         self.farm.current_year_expenditure += total_crop_cost
 
     def buy_fields(self):
-
         """
         List fields available to the player to purchase, ask if they want to
         buy one, and if so record the transaction.

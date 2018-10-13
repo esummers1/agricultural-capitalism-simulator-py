@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from game import Game
 from weather import WeatherGenerator
+from actions import *
 
 
 class InputProvider(ABC):
@@ -70,6 +71,99 @@ class InputProvider(ABC):
         pass
 
 
+class AIInputProvider(InputProvider):
+    """
+    Class representing the decision engine for a specific strategy instance of
+    the AI.
+    """
+
+    def __init__(self, game, strategy):
+        super().__init__(game)
+        self.strategy = strategy
+
+    def decide_action(self, numbered_actions):
+        """
+        Decide what to do, in this order:
+         - Buy field, if strategy says sufficient funds are available
+         - Plant crops, if there are available fields and funds
+         - Advance to harvest, if there is nothing else to do
+        """
+
+        # Buy fields
+        for action in numbered_actions:
+            if type(action) == BuyFieldsAction:
+                for field in self.game.available_fields:
+                    if field.price < (self.game.farm.money
+                                      / self.strategy.field_ratio):
+                        return action
+
+        # Plant crops
+        for action in numbered_actions:
+            if type(action) == PlantCropsAction:
+                return action
+
+        # Advance to harvest
+        for action in numbered_actions:
+            if type(action) == PlayAction:
+                return action
+
+    def decide_field_to_plant(self, numbered_fields):
+        """
+        Choose the first available field for planting.
+        """
+
+        return numbered_fields[0]
+
+    def decide_crop_to_plant(self, numbered_crops):
+        pass
+
+    def decide_crop_quantity(self, maximum):
+        """
+        Decide to plant the maximum possible number of crops.
+        """
+
+        return maximum
+
+    def decide_field_to_buy(self, numbered_fields):
+        """
+        Choose the first available field for purchase.
+        """
+
+        return numbered_fields[0]
+
+    def show_greeting(self):
+        print('\n\nEvolutionary algorithm is online.\n')
+
+    def list_available_crops_with_details(self):
+        pass
+
+    def report_status(self):
+        pass
+
+    def report_field_performance(self):
+        pass
+
+    @staticmethod
+    def show_year_results_header():
+        pass
+
+    @staticmethod
+    def report_weather(weather):
+        pass
+
+    @staticmethod
+    def report_financials(income, expenditure, new_assets):
+        pass
+
+    @staticmethod
+    def show_loss_message():
+        pass
+
+    @staticmethod
+    def show_final_score(score):
+        pass
+
+
 class PlayerInputProvider(InputProvider):
 
     def decide_action(self, numbered_actions):
@@ -124,7 +218,7 @@ class PlayerInputProvider(InputProvider):
         return PlayerInputProvider.choose_from_numbered_list(numbered_fields)
 
     def show_greeting(self):
-        print("Welcome to Agricultural Capitalism Simulator! \n")
+        print("\n\nWelcome to Agricultural Capitalism Simulator! \n")
         print("You have", self.game.max_years, "years to make maximum profit.")
 
     def list_available_crops_with_details(self):
@@ -189,7 +283,6 @@ class PlayerInputProvider(InputProvider):
 
     @staticmethod
     def find_weather_band(weather_component, weather_bands, deviation):
-
         """
         Given a component of some Weather and the deviation factor used when
         calculating said Weather component's value in this game, find the
