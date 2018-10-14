@@ -130,7 +130,7 @@ class AIInputProvider(InputProvider):
         return numbered_fields[0]
 
     def show_greeting(self, max_years):
-        print('\n\nEvolutionary algorithm is online.\n')
+        pass
 
     def list_available_crops_with_details(self, available_crops):
         pass

@@ -13,9 +13,8 @@ class Launcher(ABC):
         self.crops = self.data_reader.import_crops()
         self.fields = self.data_reader.import_fields()
 
-    @staticmethod
     @abstractmethod
-    def execute():
+    def execute(self):
         pass
 
 
@@ -24,8 +23,7 @@ class AILauncher(Launcher):
     def __init__(self):
         pass
 
-    @staticmethod
-    def execute():
+    def execute(self):
         # TODO instantiate evolver and run
         pass
 
@@ -35,8 +33,12 @@ class PlayerLauncher(Launcher):
     def __init__(self):
         super().__init__()
 
-    @staticmethod
-    def execute():
+    def execute(self):
         input_provider = PlayerInputProvider()
-        game = Game(Launcher.MAX_YEARS, Launcher.INITIAL_MONEY, input_provider)
+        game = Game(
+            Launcher.MAX_YEARS,
+            Launcher.INITIAL_MONEY,
+            input_provider,
+            self.crops,
+            self.fields)
         game.run()

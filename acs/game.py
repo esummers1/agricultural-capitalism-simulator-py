@@ -36,10 +36,9 @@ class Game:
         WeatherBand(2.5, "with monsoon storms."),
     ]
 
-    def __init__(self, max_years, initial_money, input_provider):
-        data_reader = DataReader()
-        self.available_crops = data_reader.import_crops()
-        self.available_fields = data_reader.import_fields()
+    def __init__(self, max_years, initial_money, input_provider, crops, fields):
+        self.available_crops = crops
+        self.available_fields = fields
         self.input_provider = input_provider
 
         owned_fields = []

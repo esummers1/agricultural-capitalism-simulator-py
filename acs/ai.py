@@ -80,3 +80,101 @@ class Strategy:
     def __lt__(self, other):
         return self.fitness < other.fitness
 
+
+class Evolver:
+    """
+    Class representing the evolutionary algorithm for creating, testing and
+    breeding Strategies.
+    """
+
+    NUM_GAMES = 25
+    NUM_GENERATIONS = 1000
+    POPULATION_SIZE = 100
+
+    CHANCE_TO_MUTATE_CROP = 0.25
+    CHANCE_TO_MUTATE_FIELD = 0.125
+    FIELD_MUTATION_SIZE = 0.2
+
+    # Selection pressure weighting, where 1 means fitness is ignored.
+    SCORE_BIAS = 1.8
+
+    # Number of generations to compute between console progress reports.
+    GENERATIONS_PER_SUMMARY = 10
+
+    def __init__(self, crops, fields):
+        self.crops = crops
+        self.fields = fields
+
+    def evolve(self):
+        """
+        Entry point for evolutionary algorithm.
+        """
+
+        print('Evolutionary algorithm is online.')
+
+        # Generate initial population of Strategies
+        current_generation = self.generate_initial_population()
+
+        for generation in range(Evolver.NUM_GENERATIONS):
+
+            # Compute results of using Strategies in this generation
+            self.determine_fitness(current_generation)
+
+            # Rank the Strategies in this generation by fitness
+            current_generation.sort()
+
+            # If we are reporting this generation, report
+            if generation % Evolver.GENERATIONS_PER_SUMMARY == 0:
+                self.report_progress(current_generation)
+
+            # If we are not finished yet, create the next generation
+            if generation < Evolver.NUM_GENERATIONS - 1:
+                next_generation = self.breed(current_generation)
+                self.mutate(next_generation)
+                current_generation = next_generation
+
+        current_generation.sort()
+        return current_generation
+
+    def generate_initial_population(self):
+        """
+        Create a random base population of Strategies.
+        """
+
+        strategies = []
+
+        for strategy in range(Evolver.POPULATION_SIZE):
+            pass
+
+    def determine_fitness(self, current_generation):
+        """
+        For each Strategy in the current generation, play the game using the
+        weightings described in that strategy the given number of times, and
+        store the average performance on the Strategy in question.
+        """
+
+        pass
+
+    def report_progress(self, current_generation):
+        """
+        Give a summary of the current fitness of the generation as a whole, and
+        list the weightings of the top few performers.
+        """
+
+        pass
+
+    def breed(self, current_generation):
+        """
+        Combine the Strategies in the current generation into a population of
+        equal size, preferentially using traits of the highest performers.
+        """
+
+        pass
+
+    def mutate(self, current_generation):
+        """
+        For some of the given Strategies, randomize one of their crop
+        weightings. Do the same for field weighting for a different subset.
+        """
+
+        pass
