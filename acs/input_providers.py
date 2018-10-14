@@ -1,5 +1,3 @@
-from abc import ABC, abstractmethod
-from acs.game import Game
 from acs.weather import WeatherGenerator
 from acs.actions import *
 
@@ -52,7 +50,7 @@ class InputProvider(ABC):
 
     @staticmethod
     @abstractmethod
-    def report_weather(weather):
+    def report_weather(weather, heat_bands, wetness_bands):
         pass
 
     @staticmethod
@@ -148,7 +146,7 @@ class AIInputProvider(InputProvider):
         pass
 
     @staticmethod
-    def report_weather(weather):
+    def report_weather(weather, heat_bands, wetness_bands):
         pass
 
     @staticmethod
@@ -245,16 +243,16 @@ class PlayerInputProvider(InputProvider):
         print("\n====== RESULTS ======")
 
     @staticmethod
-    def report_weather(weather):
+    def report_weather(weather, heat_bands, wetness_bands):
 
         heat_message = PlayerInputProvider.find_weather_band(
             weather.heat,
-            Game.heat_bands,
+            heat_bands,
             WeatherGenerator.heat_deviation
         )
         wetness_message = PlayerInputProvider.find_weather_band(
             weather.wetness,
-            Game.wetness_bands,
+            wetness_bands,
             WeatherGenerator.wetness_deviation
         )
         print(heat_message, wetness_message, "\n")

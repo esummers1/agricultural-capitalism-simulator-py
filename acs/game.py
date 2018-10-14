@@ -240,7 +240,8 @@ class Game:
 
         # Report to player
         self.input_provider.show_year_results_header()
-        self.input_provider.report_weather(weather)
+        self.input_provider.report_weather(
+            weather, Game.heat_bands, Game.wetness_bands)
         self.input_provider.report_financials(income, expenditure, new_assets)
         self.input_provider.report_field_performance(self.farm.owned_fields)
 

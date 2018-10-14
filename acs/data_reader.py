@@ -1,4 +1,4 @@
-from farm import Crop, Field
+from farm import *
 import json
 
 
