@@ -1,16 +1,16 @@
 from abc import ABC, abstractmethod
-from game import Game
-from weather import WeatherGenerator
-from actions import *
+from acs.game import Game
+from acs.weather import WeatherGenerator
+from acs.actions import *
 
 
 class InputProvider(ABC):
 
-    def __init__(self, game):
-        self.game = game
+    def __init__(self):
+        pass
 
     @abstractmethod
-    def decide_action(self, numbered_actions):
+    def decide_action(self, game, numbered_actions):
         pass
 
     @abstractmethod
@@ -30,11 +30,11 @@ class InputProvider(ABC):
         pass
 
     @abstractmethod
-    def show_greeting(self):
+    def show_greeting(self, max_years):
         pass
 
     @abstractmethod
-    def list_available_crops_with_details(self):
+    def list_available_crops_with_details(self, available_crops):
         pass
 
     @abstractmethod
@@ -42,7 +42,7 @@ class InputProvider(ABC):
         pass
 
     @abstractmethod
-    def report_field_performance(self):
+    def report_field_performance(self, owned_fields):
         pass
 
     @staticmethod
@@ -77,11 +77,11 @@ class AIInputProvider(InputProvider):
     the AI.
     """
 
-    def __init__(self, game, strategy):
-        super().__init__(game)
+    def __init__(self, strategy):
+        super().__init__()
         self.strategy = strategy
 
-    def decide_action(self, numbered_actions):
+    def decide_action(self, game, numbered_actions):
         """
         Decide what to do, in this order:
          - Buy field, if strategy says sufficient funds are available
@@ -92,8 +92,8 @@ class AIInputProvider(InputProvider):
         # Buy fields
         for action in numbered_actions:
             if type(action) == BuyFieldsAction:
-                for field in self.game.available_fields:
-                    if field.price < (self.game.farm.money
+                for field in game.available_fields:
+                    if field.price < (game.farm.money
                                       / self.strategy.field_ratio):
                         return action
 
@@ -131,16 +131,16 @@ class AIInputProvider(InputProvider):
 
         return numbered_fields[0]
 
-    def show_greeting(self):
+    def show_greeting(self, max_years):
         print('\n\nEvolutionary algorithm is online.\n')
 
-    def list_available_crops_with_details(self):
+    def list_available_crops_with_details(self, available_crops):
         pass
 
     def report_status(self):
         pass
 
-    def report_field_performance(self):
+    def report_field_performance(self, owned_fields):
         pass
 
     @staticmethod
@@ -166,7 +166,7 @@ class AIInputProvider(InputProvider):
 
 class PlayerInputProvider(InputProvider):
 
-    def decide_action(self, numbered_actions):
+    def decide_action(self, game, numbered_actions):
 
         # List available actions
         PlayerInputProvider.list_action_options(numbered_actions)
@@ -217,13 +217,13 @@ class PlayerInputProvider(InputProvider):
         # Prompt for choice
         return PlayerInputProvider.choose_from_numbered_list(numbered_fields)
 
-    def show_greeting(self):
+    def show_greeting(self, max_years):
         print("\n\nWelcome to Agricultural Capitalism Simulator! \n")
-        print("You have", self.game.max_years, "years to make maximum profit.")
+        print("You have", max_years, "years to make maximum profit.")
 
-    def list_available_crops_with_details(self):
+    def list_available_crops_with_details(self, available_crops):
         print("\nAvailable crops for planting:\n")
-        for crop in self.game.available_crops:
+        for crop in available_crops:
             crop.describe()
 
     def report_status(self, game):
@@ -235,9 +235,9 @@ class PlayerInputProvider(InputProvider):
         for field in game.farm.owned_fields:
             field.report_status()
 
-    def report_field_performance(self):
+    def report_field_performance(self, owned_fields):
         print()
-        for field in self.game.farm.owned_fields:
+        for field in owned_fields:
             field.report_performance()
 
     @staticmethod

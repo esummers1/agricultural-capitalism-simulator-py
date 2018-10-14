@@ -36,10 +36,11 @@ class Game:
         WeatherBand(2.5, "with monsoon storms."),
     ]
 
-    def __init__(self, max_years, initial_money):
+    def __init__(self, max_years, initial_money, input_provider):
         data_reader = DataReader()
         self.available_crops = data_reader.import_crops()
         self.available_fields = data_reader.import_fields()
+        self.input_provider = input_provider
 
         owned_fields = []
         owned_fields.append(self.available_fields.pop(0))
@@ -76,7 +77,7 @@ class Game:
         Main game loop.
         """
 
-        self.input_provider.show_greeting()
+        self.input_provider.show_greeting(self.max_years)
 
         while True:
 
@@ -103,7 +104,7 @@ class Game:
 
     def decide_action(self):
         actions = self.build_actions()
-        return self.input_provider.decide_action(actions)
+        return self.input_provider.decide_action(self, actions)
 
     def build_actions(self):
         """
@@ -142,7 +143,8 @@ class Game:
         self.input_provider.report_status(self)
 
     def list_crops(self):
-        self.input_provider.list_available_crops_with_details()
+        self.input_provider.list_available_crops_with_details(
+            self.available_crops)
 
     def plant_crops(self):
         """
@@ -240,7 +242,7 @@ class Game:
         self.input_provider.show_year_results_header()
         self.input_provider.report_weather(weather)
         self.input_provider.report_financials(income, expenditure, new_assets)
-        self.input_provider.report_field_performance()
+        self.input_provider.report_field_performance(self.farm.owned_fields)
 
         # Register results in game state
         self.current_year += 1

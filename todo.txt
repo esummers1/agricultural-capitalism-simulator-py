@@ -4,6 +4,7 @@
 
 - Add unit tests
 
-- Create notion of strategies
+- Use random seed for probabilistic behaviour
+
 - Create evolutionary algorithm for optimizing strategy
 - Report evolution results to player

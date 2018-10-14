@@ -1,11 +1,7 @@
-from acs.game import *
-from acs.input_providers import *
+from launchers import *
 
 
 if __name__ == "__main__":
-
-    # Create game state with max years and initial funds
-    game = Game(20, 500)
 
     # Ask if user wants human or AI version
     print('\nDo you wish to play manually (1), or launch the algorithm (2)?')
@@ -14,13 +10,10 @@ if __name__ == "__main__":
         selection = int(input())
 
         if selection == 1:
-            input_provider = PlayerInputProvider(game)
+            launcher = PlayerLauncher()
+            launcher.execute()
             break
         elif selection == 2:
-            input_provider = AIInputProvider(game)
+            launcher = AILauncher()
+            launcher.execute()
             break
-
-    game.input_provider = input_provider
-    game.run()
-
-
