@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from acs.data_reader import *
 from acs.game import *
+from acs.ai import *
 
 
 class Launcher(ABC):
@@ -21,11 +22,18 @@ class Launcher(ABC):
 class AILauncher(Launcher):
 
     def __init__(self):
-        pass
+        super().__init__()
 
     def execute(self):
-        # TODO instantiate evolver and run
-        pass
+        algorithm = Evolver(
+            Launcher.MAX_YEARS,
+            Launcher.INITIAL_MONEY,
+            self.crops,
+            self.fields)
+        winners = algorithm.evolve()
+
+        print("\n\n********* Top Strategies *********\n")
+        Evolver.print_top_strategies(winners, 5)
 
 
 class PlayerLauncher(Launcher):

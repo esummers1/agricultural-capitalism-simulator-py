@@ -38,7 +38,7 @@ class Game:
 
     def __init__(self, max_years, initial_money, input_provider, crops, fields):
         self.available_crops = crops
-        self.available_fields = fields
+        self.available_fields = fields.copy()
         self.input_provider = input_provider
 
         owned_fields = []

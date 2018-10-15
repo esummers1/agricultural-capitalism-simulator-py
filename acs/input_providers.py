@@ -1,5 +1,6 @@
 from acs.weather import WeatherGenerator
 from acs.actions import *
+import random
 
 
 class InputProvider(ABC):
@@ -88,21 +89,21 @@ class AIInputProvider(InputProvider):
         """
 
         # Buy fields
-        for action in numbered_actions:
-            if type(action) == BuyFieldsAction:
+        for action in numbered_actions.values():
+            if type(action) is BuyFieldsAction:
                 for field in game.available_fields:
                     if field.price < (game.farm.money
                                       / self.strategy.field_ratio):
                         return action
 
         # Plant crops
-        for action in numbered_actions:
-            if type(action) == PlantCropsAction:
+        for action in numbered_actions.values():
+            if type(action) is PlantCropsAction:
                 return action
 
         # Advance to harvest
-        for action in numbered_actions:
-            if type(action) == PlayAction:
+        for action in numbered_actions.values():
+            if type(action) is PlayAction:
                 return action
 
     def decide_field_to_plant(self, numbered_fields):
@@ -110,10 +111,26 @@ class AIInputProvider(InputProvider):
         Choose the first available field for planting.
         """
 
-        return numbered_fields[0]
+        return numbered_fields[1]
 
     def decide_crop_to_plant(self, numbered_crops):
-        pass
+        """
+        Choose a crop to plant, with this decision weighted by the crop
+        weightings in the current Strategy.
+        """
+
+        r = random.random()
+        chance_to_choose_this_crop = 0
+
+        for crop in numbered_crops.values():
+
+            # Add the probability of picking this crop to the running total
+            chance_to_choose_this_crop += self.strategy.crop_weightings[crop]
+
+            if r < chance_to_choose_this_crop:
+                return crop
+
+        return numbered_crops[len(numbered_crops) - 1]
 
     def decide_crop_quantity(self, maximum):
         """
@@ -127,7 +144,7 @@ class AIInputProvider(InputProvider):
         Choose the first available field for purchase.
         """
 
-        return numbered_fields[0]
+        return numbered_fields[1]
 
     def show_greeting(self, max_years):
         pass
@@ -324,7 +341,6 @@ class PlayerInputProvider(InputProvider):
                 return None
 
     @staticmethod
-
     def choose_quantity(maximum):
         """
         Prompt player to enter a number between 0 and the maximum, and continue

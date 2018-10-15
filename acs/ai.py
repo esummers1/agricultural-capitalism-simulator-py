@@ -1,4 +1,7 @@
 from functools import total_ordering
+import acs.input_providers
+from acs.game import *
+import random
 
 
 @total_ordering
@@ -20,10 +23,10 @@ class CropChance:
         return str(self.crop.name) + ": " + str(self.chance * 100) + "%"
 
     def __eq__(self, other):
-        return self.chance == other.chance
+        return other.chance == self.chance
 
     def __lt__(self, other):
-        return self.chance < other.chance
+        return other.chance < self.chance
 
 
 @total_ordering
@@ -48,7 +51,7 @@ class Strategy:
         the game using the stored weightings.
         """
 
-        total_weight = sum(self.crop_weightings.keys())
+        total_weight = sum(self.crop_weightings.values())
 
         for crop, weighting in self.crop_weightings.items():
             chance = (weighting / total_weight)
@@ -60,25 +63,36 @@ class Strategy:
         probabilities used to achieve it.
         """
 
-        report = ("SCORE: " + str(self.fitness) + ". Field ratio: " +
-                  str(self.field_ratio) + ".")
+        report = ("SCORE: " + str(round(self.fitness)) + "  Field ratio: " +
+                  str(round(self.field_ratio, 3)) + " || ")
 
         # Construct ordered list of crop chances
         crop_chances = []
-        for crop, chance in self.chances_to_plant:
+        for crop, chance in self.chances_to_plant.items():
             crop_chances.append(CropChance(crop, chance))
         crop_chances.sort()
 
         for crop_chance in crop_chances:
-            report += (crop_chance + ", ")
+            report += (crop_chance.crop.name + ": " +
+                       str(int(round(crop_chance.chance * 100))) + "%  ")
 
-        return report
+        print(report)
+
+    def replace_weighting(self, crop_to_replace, new_weighting):
+        """
+        Update an existing Crop => Weighting pair with a given new weighting.
+        """
+
+        for crop, weighting in self.crop_weightings.items():
+            if crop == crop_to_replace:
+                self.crop_weightings[crop] = new_weighting
+        self.calculate_chances_to_plant()
 
     def __eq__(self, other):
-        return self.fitness == other.fitness
+        return other.fitness == self.fitness
 
     def __lt__(self, other):
-        return self.fitness < other.fitness
+        return other.fitness < self.fitness
 
 
 class Evolver:
@@ -87,21 +101,26 @@ class Evolver:
     breeding Strategies.
     """
 
-    NUM_GAMES = 25
+    NUM_GAMES = 5
     NUM_GENERATIONS = 1000
-    POPULATION_SIZE = 100
+    POPULATION_SIZE = 10
 
     CHANCE_TO_MUTATE_CROP = 0.25
     CHANCE_TO_MUTATE_FIELD = 0.125
-    FIELD_MUTATION_SIZE = 0.2
+    FIELD_MUTATION_SIZE = 0.5
 
     # Selection pressure weighting, where 1 means fitness is ignored.
     SCORE_BIAS = 1.8
 
     # Number of generations to compute between console progress reports.
-    GENERATIONS_PER_SUMMARY = 10
+    GENERATIONS_PER_SUMMARY = 1
 
-    def __init__(self, crops, fields):
+    # Number of Strategies included in progress reports.
+    TOP_STRATEGIES_TO_REPORT = 5
+
+    def __init__(self, max_years, initial_money, crops, fields):
+        self.max_years = max_years
+        self.initial_money = initial_money
         self.crops = crops
         self.fields = fields
 
@@ -125,7 +144,12 @@ class Evolver:
 
             # If we are reporting this generation, report
             if generation % Evolver.GENERATIONS_PER_SUMMARY == 0:
-                self.report_progress(current_generation)
+                average_fitness = \
+                    self.sum_fitness_of_strategies(current_generation) \
+                    / Evolver.POPULATION_SIZE
+
+                self.report_progress(
+                    current_generation, generation, average_fitness)
 
             # If we are not finished yet, create the next generation
             if generation < Evolver.NUM_GENERATIONS - 1:
@@ -144,7 +168,16 @@ class Evolver:
         strategies = []
 
         for strategy in range(Evolver.POPULATION_SIZE):
-            pass
+            crop_weightings = {}
+
+            for crop in self.crops:
+                weighting = random.randint(1, 100)
+                crop_weightings[crop] = weighting
+
+            field_ratio = random.random() * 2 + 1
+            strategies.append(Strategy(crop_weightings, field_ratio))
+
+        return strategies
 
     def determine_fitness(self, current_generation):
         """
@@ -153,15 +186,61 @@ class Evolver:
         store the average performance on the Strategy in question.
         """
 
-        pass
+        for strategy in current_generation:
+            input_provider = acs.input_providers.AIInputProvider(strategy)
+            scores = []
 
-    def report_progress(self, current_generation):
+            # Run strategy through specified number of games
+            for i in range(Evolver.NUM_GAMES):
+                game = Game(
+                    self.max_years,
+                    self.initial_money,
+                    input_provider,
+                    self.crops,
+                    self.fields)
+                score = game.run()
+                scores.append(score)
+
+            # Calculate fitness for this strategy
+            strategy.fitness = sum(scores) / len(scores)
+
+    @staticmethod
+    def sum_fitness_of_strategies(strategies):
+        """
+        For a list of Strategies whose fitness has been computed, return the
+        sum of their fitnesses (i.e. average scores across all games).
+        """
+
+        total_fitness = 0
+
+        for strategy in strategies:
+            total_fitness += strategy.fitness
+
+        return total_fitness
+
+    @staticmethod
+    def report_progress(current_generation, generation_number, average_fitness):
         """
         Give a summary of the current fitness of the generation as a whole, and
         list the weightings of the top few performers.
         """
 
-        pass
+        print("\n***** Generation " + str(generation_number + 1)
+              + " - Average Score: " + str(round(average_fitness)))
+        Evolver.print_top_strategies(
+            current_generation, Evolver.TOP_STRATEGIES_TO_REPORT)
+
+    @staticmethod
+    def print_top_strategies(strategies, number_to_list):
+        """
+        Given a list of Strategies sorted by fitness and a number N, list the
+        weightings of the top N Strategies.
+        """
+
+        maximum = min(number_to_list, len(strategies))
+
+        for i in range(maximum):
+            strategies[i].describe()
 
     def breed(self, current_generation):
         """
@@ -169,7 +248,8 @@ class Evolver:
         equal size, preferentially using traits of the highest performers.
         """
 
-        pass
+        # TODO implementing breeding
+        return current_generation
 
     def mutate(self, current_generation):
         """
@@ -177,4 +257,22 @@ class Evolver:
         weightings. Do the same for field weighting for a different subset.
         """
 
-        pass
+        for strategy in current_generation:
+            r = random.random()
+
+            # If mutating crop weighting, find out which one and to what
+            if r < Evolver.CHANCE_TO_MUTATE_CROP:
+                weighting_to_change = \
+                    int(round(random.random() * len(self.crops)))
+                new_weighting = int(round(random.random() * 100))
+
+                # Find out which Crop this is
+                crop_to_replace = self.crops[weighting_to_change]
+
+                # Replace this Crop's weighting in the Strategy
+                strategy.replace_weighting(crop_to_replace, new_weighting)
+
+            # If mutating field ratio, add or subtract up to the size constant
+            if r < Evolver.CHANCE_TO_MUTATE_FIELD:
+                strategy.field_ratio += (random.random() * 2 - 1) \
+                                        * Evolver.FIELD_MUTATION_SIZE
