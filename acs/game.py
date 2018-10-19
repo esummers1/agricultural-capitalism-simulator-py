@@ -164,7 +164,7 @@ class Game:
 
         # Decide crop for planting
         affordable_crops = [crop for crop in self.available_crops
-                            if crop.cost < self.farm.money]
+                            if crop.cost <= self.farm.money]
         numbered_crops = Game.make_numbered_dictionary(affordable_crops)
         selected_crop = self.input_provider.decide_crop_to_plant(numbered_crops)
 

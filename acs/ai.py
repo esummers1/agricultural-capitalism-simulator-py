@@ -101,19 +101,19 @@ class Evolver:
     breeding Strategies.
     """
 
-    NUM_GAMES = 5
+    NUM_GAMES = 10
     NUM_GENERATIONS = 1000
-    POPULATION_SIZE = 10
+    POPULATION_SIZE = 50
 
-    CHANCE_TO_MUTATE_CROP = 0.25
+    CHANCE_TO_MUTATE_CROP = 0.1
     CHANCE_TO_MUTATE_FIELD = 0.125
     FIELD_MUTATION_SIZE = 0.5
 
     # Selection pressure weighting, where 1 means fitness is ignored.
-    SCORE_BIAS = 1.8
+    SCORE_BIAS = 1.6
 
     # Number of generations to compute between console progress reports.
-    GENERATIONS_PER_SUMMARY = 1
+    GENERATIONS_PER_SUMMARY = 10
 
     # Number of Strategies included in progress reports.
     TOP_STRATEGIES_TO_REPORT = 5
@@ -123,6 +123,14 @@ class Evolver:
         self.initial_money = initial_money
         self.crops = crops
         self.fields = fields
+
+        # Probability of selecting the first available parent (start of
+        # geometric sequence)
+        self.initial_selection_probability = \
+            Evolver.SCORE_BIAS / Evolver.POPULATION_SIZE
+
+        # Common ratio for geometric selection sequence
+        self.common_ratio = Evolver.calculate_common_ratio(self)
 
     def evolve(self):
         """
@@ -248,8 +256,75 @@ class Evolver:
         equal size, preferentially using traits of the highest performers.
         """
 
-        # TODO implementing breeding
-        return current_generation
+        next_generation = []
+
+        for i in range(Evolver.POPULATION_SIZE):
+
+            child_crop_weightings = {}
+
+            # Select parent Strategies
+            father = self.choose_parent(current_generation)
+            mother = self.choose_parent(current_generation)
+
+            # Use odd-number ID crop weightings from father Strategy
+            for crop, weighting in father.crop_weightings.items():
+                if crop.id % 2 != 0:
+                    child_crop_weightings[crop] = weighting
+
+            # Use even-number ID crop weightings from mother Strategy
+            for crop, weighting in mother.crop_weightings.items():
+                if crop.id % 2 == 0:
+                    child_crop_weightings[crop] = weighting
+
+            # Take average of field weightings from both Strategies
+            field_ratio = 0.5 * (father.field_ratio + mother.field_ratio)
+
+            # Add child
+            child = Strategy(child_crop_weightings, field_ratio)
+            next_generation.append(child)
+
+        return next_generation
+
+    def calculate_common_ratio(self):
+        """
+        Use an iterative technique to calculate the common ratio for the
+        geometric sequence used to select parent strategies.
+        """
+
+        this_r = self.initial_selection_probability
+        size = Evolver.POPULATION_SIZE
+
+        while True:
+            next_r = ((size - 2) + 2 * (this_r ** size)) / size
+
+            if abs(next_r - this_r) < 0.000001:
+                return this_r
+            else:
+                this_r = next_r
+
+    def choose_parent(self, generation):
+        """
+        Return a parent Strategy from the given list at random, with earlier
+        (i.e. fitter) Strategies being advantaged.
+        """
+
+        r = random.random()
+        initial_probability = self.initial_selection_probability
+        cumulative_probability = initial_probability
+
+        for counter, strategy in enumerate(generation, start=1):
+
+            if r < cumulative_probability:
+                return strategy
+
+            # Use the common ratio and our position in the list to calculate the
+            # additive probability of the current element, given that each
+            # element has the probability of the previous * the common ratio.
+            cumulative_probability += \
+                (self.initial_selection_probability
+                 * self.common_ratio ** (counter - 1))
+
+        return generation[len(generation) - 1]
 
     def mutate(self, current_generation):
         """
@@ -263,7 +338,7 @@ class Evolver:
             # If mutating crop weighting, find out which one and to what
             if r < Evolver.CHANCE_TO_MUTATE_CROP:
                 weighting_to_change = \
-                    int(round(random.random() * len(self.crops)))
+                    int(round(random.random() * (len(self.crops) - 1)))
                 new_weighting = int(round(random.random() * 100))
 
                 # Find out which Crop this is

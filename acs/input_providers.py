@@ -130,7 +130,7 @@ class AIInputProvider(InputProvider):
             if r < chance_to_choose_this_crop:
                 return crop
 
-        return numbered_crops[len(numbered_crops) - 1]
+        return numbered_crops[len(numbered_crops)]
 
     def decide_crop_quantity(self, maximum):
         """
