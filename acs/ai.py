@@ -1,7 +1,8 @@
 from functools import total_ordering
+import random
+
 import acs.input_providers
 from acs.game import *
-import random
 
 
 @total_ordering
@@ -266,24 +267,34 @@ class Evolver:
             father = self.choose_parent(current_generation)
             mother = self.choose_parent(current_generation)
 
-            # Use odd-number ID crop weightings from father Strategy
-            for crop, weighting in father.crop_weightings.items():
-                if crop.id % 2 != 0:
-                    child_crop_weightings[crop] = weighting
-
-            # Use even-number ID crop weightings from mother Strategy
-            for crop, weighting in mother.crop_weightings.items():
-                if crop.id % 2 == 0:
-                    child_crop_weightings[crop] = weighting
-
-            # Take average of field weightings from both Strategies
-            field_ratio = 0.5 * (father.field_ratio + mother.field_ratio)
-
-            # Add child
-            child = Strategy(child_crop_weightings, field_ratio)
-            next_generation.append(child)
+            # Create child
+            next_generation.append(Evolver.create_child(father, mother))
 
         return next_generation
+
+    @staticmethod
+    def create_child(father, mother):
+        """
+        Given 'father' and 'mother' Strategies, combine their traits into a
+        single child Strategy.
+        """
+
+        child_crop_weightings = {}
+
+        # Use odd-number ID crop weightings from father Strategy
+        for crop, weighting in father.crop_weightings.items():
+            if crop.id % 2 != 0:
+                child_crop_weightings[crop] = weighting
+
+        # Use even-number ID crop weightings from mother Strategy
+        for crop, weighting in mother.crop_weightings.items():
+            if crop.id % 2 == 0:
+                child_crop_weightings[crop] = weighting
+
+        # Take average of field weightings from both Strategies
+        child_field_ratio = 0.5 * (father.field_ratio + mother.field_ratio)
+
+        return Strategy(child_crop_weightings, child_field_ratio)
 
     def calculate_common_ratio(self):
         """
