@@ -177,16 +177,24 @@ class Evolver:
         strategies = []
 
         for strategy in range(Evolver.POPULATION_SIZE):
-            crop_weightings = {}
-
-            for crop in self.crops:
-                weighting = random.randint(1, 100)
-                crop_weightings[crop] = weighting
-
-            field_ratio = random.random() * 2 + 1
-            strategies.append(Strategy(crop_weightings, field_ratio))
+            strategies.append(self.generate_random_strategy())
 
         return strategies
+
+    def generate_random_strategy(self):
+        """
+        Create a random Strategy.
+        """
+
+        crop_weightings = {}
+
+        for crop in self.crops:
+            weighting = random.randint(1, 10000)
+            crop_weightings[crop] = weighting
+
+        field_ratio = random.random() * 2 + 1
+
+        return Strategy(crop_weightings, field_ratio)
 
     def determine_fitness(self, current_generation):
         """
