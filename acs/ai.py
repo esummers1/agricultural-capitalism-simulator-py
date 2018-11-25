@@ -162,7 +162,7 @@ class Evolver:
 
             # If we are not finished yet, create the next generation
             if generation < Evolver.NUM_GENERATIONS - 1:
-                next_generation = self.breed(current_generation)
+                next_generation = self.breed_generation(current_generation)
                 self.mutate(next_generation)
                 current_generation = next_generation
 
@@ -189,7 +189,7 @@ class Evolver:
         crop_weightings = {}
 
         for crop in self.crops:
-            weighting = random.randint(1, 10000)
+            weighting = random.randint(1, 100)
             crop_weightings[crop] = weighting
 
         field_ratio = random.random() * 2 + 1
@@ -198,28 +198,35 @@ class Evolver:
 
     def determine_fitness(self, current_generation):
         """
-        For each Strategy in the current generation, play the game using the
-        weightings described in that strategy the given number of times, and
-        store the average performance on the Strategy in question.
+        For each Strategy in the supplied generation, determine its fitness at
+        playing the game.
         """
 
         for strategy in current_generation:
-            input_provider = acs.input_providers.AIInputProvider(strategy)
-            scores = []
+            self.evaluate_strategy(strategy)
 
-            # Run strategy through specified number of games
-            for i in range(Evolver.NUM_GAMES):
-                game = Game(
-                    self.max_years,
-                    self.initial_money,
-                    input_provider,
-                    self.crops,
-                    self.fields)
-                score = game.run()
-                scores.append(score)
+    def evaluate_strategy(self, strategy):
+        """
+        Exercise a single Strategy for the requisite number of games and store
+        its fitness.
+        """
 
-            # Calculate fitness for this strategy
-            strategy.fitness = sum(scores) / len(scores)
+        input_provider = acs.input_providers.AIInputProvider(strategy)
+        scores = []
+
+        # Run Strategy through games
+        for i in range(Evolver.NUM_GAMES):
+            game = Game(
+                self.max_years,
+                self.initial_money,
+                input_provider,
+                self.crops,
+                self.fields)
+            score = game.run()
+            scores.append(score)
+
+        # Calculate overall fitness
+        strategy.fitness = sum(scores) / len(scores)
 
     @staticmethod
     def sum_fitness_of_strategies(strategies):
@@ -259,7 +266,7 @@ class Evolver:
         for i in range(maximum):
             strategies[i].describe()
 
-    def breed(self, current_generation):
+    def breed_generation(self, current_generation):
         """
         Combine the Strategies in the current generation into a population of
         equal size, preferentially using traits of the highest performers.

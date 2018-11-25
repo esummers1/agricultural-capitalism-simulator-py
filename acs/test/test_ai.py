@@ -98,10 +98,37 @@ class TestStrategy(unittest.TestCase):
 class TestEvolver(unittest.TestCase):
 
     def setUp(self):
-        pass
-
-    def test_generate_initial_population(self):
-        pass
+        self.crops = [
+            farm.Crop(1, 'Crop 1', 'Crop 1', 10, 20, 1.1, 0.9, 2, 0.5),
+            farm.Crop(2, 'Crop 2', 'Crop 2', 5, 15, 1.2, 0.8, 0.5, 2)
+        ]
+        self.fields = [farm.Field(1, 'Field 1', '', 100, 1, 1000)]
+        self.evolver = ai.Evolver(20, 500, self.crops, self.fields)
+        self.crop_weightings = {self.crops[0]: 50, self.crops[1]: 80}
+        self.strategy = ai.Strategy(self.crop_weightings, 2)
 
     def test_generate_random_strategy(self):
+        # GIVEN some Evolver
+        # WHEN I use it to create a random Strategy
+        strategy = self.evolver.generate_random_strategy()
+
+        # THEN this Strategy has a populated dictionary of crop weightings
+        self.assertEqual(len(self.crops), len(strategy.crop_weightings))
+
+        # AND a field ratio greater than or equal to 1
+        self.assertTrue(strategy.field_ratio >= 1)
+
+    def test_evaluate_strategy(self):
+        # GIVEN some Evolver and some Strategy
+        # WHEN I evaluate its fitness
+        self.evolver.evaluate_strategy(self.strategy)
+
+        # THEN its fitness is greater than zero, as even a lost game will have
+        # a positive score
+        self.assertTrue(self.strategy.fitness > 0)
+
+    def test_breed_generation(self):
+        pass
+
+    def test_create_child(self):
         pass
