@@ -2,8 +2,4 @@
 || TO DO
 ================================================================================
 
-- Add unit tests
-- Fix algorithm to actually optimize; possible failure modes:
- --> Game is not being played correctly (i.e. according to strat)
- --> Strategies are not being bred correctly
- --> Strategies are not mutating sufficiently
+- Finish unit tests

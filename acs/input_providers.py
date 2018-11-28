@@ -125,7 +125,7 @@ class AIInputProvider(InputProvider):
         for crop in numbered_crops.values():
 
             # Add the probability of picking this crop to the running total
-            chance_to_choose_this_crop += self.strategy.crop_weightings[crop]
+            chance_to_choose_this_crop += self.strategy.chances_to_plant[crop]
 
             if r < chance_to_choose_this_crop:
                 return crop

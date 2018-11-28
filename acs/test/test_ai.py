@@ -127,8 +127,37 @@ class TestEvolver(unittest.TestCase):
         # a positive score
         self.assertTrue(self.strategy.fitness > 0)
 
-    def test_breed_generation(self):
-        pass
-
     def test_create_child(self):
-        pass
+        # GIVEN father and mother Strategies
+        father = ai.Strategy({self.crops[0]: 100, self.crops[1]: 100}, 5)
+        mother = ai.Strategy({self.crops[0]: 50, self.crops[1]: 50}, 3)
+
+        # WHEN I combine them to create a child
+        child = ai.Evolver.create_child(father, mother)
+
+        # THEN the child has the father's odd-numbered crop weightings
+        self.assertEqual(
+            father.crop_weightings[self.crops[0]],
+            child.crop_weightings[self.crops[0]])
+
+        # AND it has the mother's even-numbered crop weightings
+        self.assertEqual(
+            mother.crop_weightings[self.crops[1]],
+            child.crop_weightings[self.crops[1]])
+
+        # AND its field ratio is the average of both parents'
+        self.assertEqual(4, child.field_ratio)
+
+    def test_calculate_common_ratio(self):
+        # GIVEN I know the common ratio
+        # WHEN I use it to describe a geometric sequence of equal size to the
+        # population
+        remaining_probability = 1
+        current_probability = self.evolver.initial_selection_probability
+
+        for i in range(ai.Evolver.POPULATION_SIZE):
+            remaining_probability -= current_probability
+            current_probability *= self.evolver.common_ratio
+
+        # THEN the sequence tends to 1
+        self.assertTrue(remaining_probability < 0.01)

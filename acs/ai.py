@@ -65,7 +65,7 @@ class Strategy:
         """
 
         report = ("SCORE: " + str(round(self.fitness)) + "  Field ratio: " +
-                  str(round(self.field_ratio, 3)) + " || ")
+                  "{:.3f}".format(round(self.field_ratio, 3)) + " || ")
 
         # Construct ordered list of crop chances
         crop_chances = []
@@ -104,17 +104,14 @@ class Evolver:
 
     NUM_GAMES = 10
     NUM_GENERATIONS = 1000
-    POPULATION_SIZE = 50
+    POPULATION_SIZE = 100
 
     CHANCE_TO_MUTATE_CROP = 0.1
     CHANCE_TO_MUTATE_FIELD = 0.125
     FIELD_MUTATION_SIZE = 0.5
 
-    # Selection pressure weighting, where 1 means fitness is ignored.
-    SCORE_BIAS = 1.6
-
     # Number of generations to compute between console progress reports.
-    GENERATIONS_PER_SUMMARY = 10
+    GENERATIONS_PER_SUMMARY = 1
 
     # Number of Strategies included in progress reports.
     TOP_STRATEGIES_TO_REPORT = 5
@@ -127,8 +124,7 @@ class Evolver:
 
         # Probability of selecting the first available parent (start of
         # geometric sequence)
-        self.initial_selection_probability = \
-            Evolver.SCORE_BIAS / Evolver.POPULATION_SIZE
+        self.initial_selection_probability = 2 / Evolver.POPULATION_SIZE
 
         # Common ratio for geometric selection sequence
         self.common_ratio = Evolver.calculate_common_ratio(self)
@@ -275,8 +271,6 @@ class Evolver:
         next_generation = []
 
         for i in range(Evolver.POPULATION_SIZE):
-
-            child_crop_weightings = {}
 
             # Select parent Strategies
             father = self.choose_parent(current_generation)
