@@ -1,15 +1,15 @@
-from abc import ABC, abstractmethod
-from game import Game
-from weather import WeatherGenerator
+from acs.weather import WeatherGenerator
+from acs.actions import *
+import random
 
 
 class InputProvider(ABC):
 
-    def __init__(self, game):
-        self.game = game
+    def __init__(self):
+        pass
 
     @abstractmethod
-    def decide_action(self, numbered_actions):
+    def decide_action(self, game, numbered_actions):
         pass
 
     @abstractmethod
@@ -29,11 +29,11 @@ class InputProvider(ABC):
         pass
 
     @abstractmethod
-    def show_greeting(self):
+    def show_greeting(self, max_years):
         pass
 
     @abstractmethod
-    def list_available_crops_with_details(self):
+    def list_available_crops_with_details(self, available_crops):
         pass
 
     @abstractmethod
@@ -41,7 +41,7 @@ class InputProvider(ABC):
         pass
 
     @abstractmethod
-    def report_field_performance(self):
+    def report_field_performance(self, owned_fields):
         pass
 
     @staticmethod
@@ -51,7 +51,7 @@ class InputProvider(ABC):
 
     @staticmethod
     @abstractmethod
-    def report_weather(weather):
+    def report_weather(weather, heat_bands, wetness_bands):
         pass
 
     @staticmethod
@@ -70,9 +70,118 @@ class InputProvider(ABC):
         pass
 
 
+class AIInputProvider(InputProvider):
+    """
+    Class representing the decision engine for a specific strategy instance of
+    the AI.
+    """
+
+    def __init__(self, strategy):
+        super().__init__()
+        self.strategy = strategy
+
+    def decide_action(self, game, numbered_actions):
+        """
+        Decide what to do, in this order:
+         - Buy field, if strategy says sufficient funds are available
+         - Plant crops, if there are available fields and funds
+         - Advance to harvest, if there is nothing else to do
+        """
+
+        # Buy fields
+        for action in numbered_actions.values():
+            if type(action) is BuyFieldsAction:
+                for field in game.available_fields:
+                    if field.price < (game.farm.money
+                                      / self.strategy.field_ratio):
+                        return action
+
+        # Plant crops
+        for action in numbered_actions.values():
+            if type(action) is PlantCropsAction:
+                return action
+
+        # Advance to harvest
+        for action in numbered_actions.values():
+            if type(action) is PlayAction:
+                return action
+
+    def decide_field_to_plant(self, numbered_fields):
+        """
+        Choose the first available field for planting.
+        """
+
+        return numbered_fields[1]
+
+    def decide_crop_to_plant(self, numbered_crops):
+        """
+        Choose a crop to plant, with this decision weighted by the crop
+        weightings in the current Strategy.
+        """
+
+        r = random.random()
+        chance_to_choose_this_crop = 0
+
+        for crop in numbered_crops.values():
+
+            # Add the probability of picking this crop to the running total
+            chance_to_choose_this_crop += self.strategy.chances_to_plant[crop]
+
+            if r < chance_to_choose_this_crop:
+                return crop
+
+        return numbered_crops[len(numbered_crops)]
+
+    def decide_crop_quantity(self, maximum):
+        """
+        Decide to plant the maximum possible number of crops.
+        """
+
+        return maximum
+
+    def decide_field_to_buy(self, numbered_fields):
+        """
+        Choose the first available field for purchase.
+        """
+
+        return numbered_fields[1]
+
+    def show_greeting(self, max_years):
+        pass
+
+    def list_available_crops_with_details(self, available_crops):
+        pass
+
+    def report_status(self):
+        pass
+
+    def report_field_performance(self, owned_fields):
+        pass
+
+    @staticmethod
+    def show_year_results_header():
+        pass
+
+    @staticmethod
+    def report_weather(weather, heat_bands, wetness_bands):
+        pass
+
+    @staticmethod
+    def report_financials(income, expenditure, new_assets):
+        pass
+
+    @staticmethod
+    def show_loss_message():
+        pass
+
+    @staticmethod
+    def show_final_score(score):
+        pass
+
+
 class PlayerInputProvider(InputProvider):
 
-    def decide_action(self, numbered_actions):
+    def decide_action(self, game, numbered_actions):
 
         # List available actions
         PlayerInputProvider.list_action_options(numbered_actions)
@@ -123,13 +232,13 @@ class PlayerInputProvider(InputProvider):
         # Prompt for choice
         return PlayerInputProvider.choose_from_numbered_list(numbered_fields)
 
-    def show_greeting(self):
-        print("Welcome to Agricultural Capitalism Simulator! \n")
-        print("You have", self.game.max_years, "years to make maximum profit.")
+    def show_greeting(self, max_years):
+        print("\n\nWelcome to Agricultural Capitalism Simulator! \n")
+        print("You have", max_years, "years to make maximum profit.")
 
-    def list_available_crops_with_details(self):
+    def list_available_crops_with_details(self, available_crops):
         print("\nAvailable crops for planting:\n")
-        for crop in self.game.available_crops:
+        for crop in available_crops:
             crop.describe()
 
     def report_status(self, game):
@@ -141,9 +250,9 @@ class PlayerInputProvider(InputProvider):
         for field in game.farm.owned_fields:
             field.report_status()
 
-    def report_field_performance(self):
+    def report_field_performance(self, owned_fields):
         print()
-        for field in self.game.farm.owned_fields:
+        for field in owned_fields:
             field.report_performance()
 
     @staticmethod
@@ -151,16 +260,16 @@ class PlayerInputProvider(InputProvider):
         print("\n====== RESULTS ======")
 
     @staticmethod
-    def report_weather(weather):
+    def report_weather(weather, heat_bands, wetness_bands):
 
         heat_message = PlayerInputProvider.find_weather_band(
             weather.heat,
-            Game.heat_bands,
+            heat_bands,
             WeatherGenerator.heat_deviation
         )
         wetness_message = PlayerInputProvider.find_weather_band(
             weather.wetness,
-            Game.wetness_bands,
+            wetness_bands,
             WeatherGenerator.wetness_deviation
         )
         print(heat_message, wetness_message, "\n")
@@ -189,7 +298,6 @@ class PlayerInputProvider(InputProvider):
 
     @staticmethod
     def find_weather_band(weather_component, weather_bands, deviation):
-
         """
         Given a component of some Weather and the deviation factor used when
         calculating said Weather component's value in this game, find the
@@ -233,7 +341,6 @@ class PlayerInputProvider(InputProvider):
                 return None
 
     @staticmethod
-
     def choose_quantity(maximum):
         """
         Prompt player to enter a number between 0 and the maximum, and continue

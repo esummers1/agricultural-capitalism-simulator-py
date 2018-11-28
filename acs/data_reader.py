@@ -1,4 +1,4 @@
-from farm import Crop, Field
+from acs.farm import *
 import json
 
 

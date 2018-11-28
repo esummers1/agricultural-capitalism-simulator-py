@@ -107,7 +107,6 @@ class Crop:
                  ideal_wetness,
                  heat_sensitivity,
                  wetness_sensitivity):
-
         self.id = id
         self.name = name
         self.description = description

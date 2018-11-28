@@ -36,10 +36,10 @@ class Game:
         WeatherBand(2.5, "with monsoon storms."),
     ]
 
-    def __init__(self, max_years, initial_money):
-        data_reader = DataReader()
-        self.available_crops = data_reader.import_crops()
-        self.available_fields = data_reader.import_fields()
+    def __init__(self, max_years, initial_money, input_provider, crops, fields):
+        self.available_crops = crops
+        self.available_fields = fields.copy()
+        self.input_provider = input_provider
 
         owned_fields = []
         owned_fields.append(self.available_fields.pop(0))
@@ -50,7 +50,6 @@ class Game:
         self.exiting = False
         self.weather_generator = WeatherGenerator()
         self.lowest_crop_cost = self.get_lowest_crop_cost()
-        self.input_provider = PlayerInputProvider(self)
 
     def get_lowest_crop_cost(self):
 
@@ -73,16 +72,19 @@ class Game:
         return lowest_price
 
     def run(self):
-
         """
         Main game loop.
         """
 
-        self.input_provider.show_greeting()
+        self.input_provider.show_greeting(self.max_years)
 
         while True:
 
             action = self.decide_action()
+
+            if action is None:
+                continue
+
             action.execute()
 
             if self.exiting:
@@ -101,10 +103,9 @@ class Game:
 
     def decide_action(self):
         actions = self.build_actions()
-        return self.input_provider.decide_action(actions)
+        return self.input_provider.decide_action(self, actions)
 
     def build_actions(self):
-
         """
         Create a numbered dictionary of Actions based on the current situation.
         """
@@ -141,10 +142,10 @@ class Game:
         self.input_provider.report_status(self)
 
     def list_crops(self):
-        self.input_provider.list_available_crops_with_details()
+        self.input_provider.list_available_crops_with_details(
+            self.available_crops)
 
     def plant_crops(self):
-
         """
         Prompt player to select an empty field, a crop, and a quantity to plant.
         Store these crops in the appropriate field and record the transaction.
@@ -163,7 +164,7 @@ class Game:
 
         # Decide crop for planting
         affordable_crops = [crop for crop in self.available_crops
-                            if crop.cost < self.farm.money]
+                            if crop.cost <= self.farm.money]
         numbered_crops = Game.make_numbered_dictionary(affordable_crops)
         selected_crop = self.input_provider.decide_crop_to_plant(numbered_crops)
 
@@ -192,7 +193,6 @@ class Game:
         self.farm.current_year_expenditure += total_crop_cost
 
     def buy_fields(self):
-
         """
         List fields available to the player to purchase, ask if they want to
         buy one, and if so record the transaction.
@@ -239,9 +239,10 @@ class Game:
 
         # Report to player
         self.input_provider.show_year_results_header()
-        self.input_provider.report_weather(weather)
+        self.input_provider.report_weather(
+            weather, Game.heat_bands, Game.wetness_bands)
         self.input_provider.report_financials(income, expenditure, new_assets)
-        self.input_provider.report_field_performance()
+        self.input_provider.report_field_performance(self.farm.owned_fields)
 
         # Register results in game state
         self.current_year += 1

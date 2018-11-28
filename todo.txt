@@ -2,8 +2,4 @@
 || TO DO
 ================================================================================
 
-- Add unit tests
-
-- Create notion of strategies
-- Create evolutionary algorithm for optimizing strategy
-- Report evolution results to player
+- Finish unit tests
