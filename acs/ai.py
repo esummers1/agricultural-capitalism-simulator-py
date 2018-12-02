@@ -102,13 +102,13 @@ class Evolver:
     breeding Strategies.
     """
 
-    NUM_GAMES = 10
+    NUM_GAMES = 20
     NUM_GENERATIONS = 1000
     POPULATION_SIZE = 100
 
-    CHANCE_TO_MUTATE_CROP = 0.1
-    CHANCE_TO_MUTATE_FIELD = 0.125
-    FIELD_MUTATION_SIZE = 0.5
+    CHANCE_TO_MUTATE_CROP = 0.25
+    CHANCE_TO_MUTATE_FIELD = 0.2
+    FIELD_MUTATION_SIZE = 0.7
 
     # Number of generations to compute between console progress reports.
     GENERATIONS_PER_SUMMARY = 1
@@ -185,7 +185,7 @@ class Evolver:
         crop_weightings = {}
 
         for crop in self.crops:
-            weighting = random.randint(1, 100)
+            weighting = random.randint(1, 1000)
             crop_weightings[crop] = weighting
 
         field_ratio = random.random() * 2 + 1
@@ -355,19 +355,38 @@ class Evolver:
         for strategy in current_generation:
             r = random.random()
 
-            # If mutating crop weighting, find out which one and to what
             if r < Evolver.CHANCE_TO_MUTATE_CROP:
-                weighting_to_change = \
-                    int(round(random.random() * (len(self.crops) - 1)))
-                new_weighting = int(round(random.random() * 100))
-
-                # Find out which Crop this is
-                crop_to_replace = self.crops[weighting_to_change]
-
-                # Replace this Crop's weighting in the Strategy
-                strategy.replace_weighting(crop_to_replace, new_weighting)
+                self.mutate_crop_weighting(strategy)
 
             # If mutating field ratio, add or subtract up to the size constant
             if r < Evolver.CHANCE_TO_MUTATE_FIELD:
-                strategy.field_ratio += (random.random() * 2 - 1) \
-                                        * Evolver.FIELD_MUTATION_SIZE
+                Evolver.mutate_field_ratio(strategy)
+
+    def mutate_crop_weighting(self, strategy):
+        """
+        Randomly mutate a random crop weighting of the supplied Strategy.
+        """
+
+        # Determine which crop's weighting to change
+        weighting_to_change = \
+            int(round(random.random() * (len(self.crops) - 1)))
+
+        # Generate new weighting
+        new_weighting = int(round(random.random() * 100))
+
+        # Replace weighting in Strategy
+        strategy.replace_weighting(
+            self.crops[weighting_to_change], new_weighting)
+
+    @staticmethod
+    def mutate_field_ratio(strategy):
+        """
+        Mutate the given Strategy's field ratio by up to the known maximum
+        mutation size.
+        """
+
+        # Generate field ratio delta
+        delta = (random.random() * 2 - 1) * Evolver.FIELD_MUTATION_SIZE
+
+        # Modify field ratio in Strategy
+        strategy.field_ratio += delta
